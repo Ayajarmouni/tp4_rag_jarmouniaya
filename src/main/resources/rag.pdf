@@ -1,0 +1,22 @@
+Document de Référence : Architecture et Fonctionnement du RAG
+
+1. Introduction au RAG (Retrieval-Augmented Generation)
+Le RAG (Génération Augmentée par Récupération) est une architecture d'intelligence artificielle qui combine la puissance des grands modèles de langage (LLM) avec une base de connaissances externe. Contrairement à un LLM standard qui s'appuie uniquement sur ses données d'entraînement statiques, un système RAG recherche dynamiquement des informations pertinentes dans des documents privés ou récents avant de formuler une réponse. Cela permet de réduire considérablement les hallucinations et de citer les sources exactes.
+
+2. Les étapes clés d'un pipeline RAG
+Le fonctionnement d'un système RAG se divise en deux phases principales : l'indexation (ingestion) et l'interrogation (génération).
+-Chargement et découpage (Chunking) : Les documents sources (PDF, TXT, HTML) sont chargés puis découpés en petits segments de texte appelés chunks (par exemple, des blocs de 300 à 500 mots avec un chevauchement ou overlap de 50 mots pour préserver le contexte).
+-Vectorisation (Embeddings) : Chaque segment de texte est transformé en un vecteur numérique multidimensionnel à l'aide d'un modèle d'embedding (tel que AllMiniLmL6V2 en local ou text-embedding-004 via l'API Google Gemini).
+-Stockage vectoriel (Vector Store) : Les vecteurs sont enregistrés dans une base de données spécialisée (en mémoire avec InMemoryEmbeddingStore dans LangChain4j, ou persistante avec PostgreSQL/pgvector, Chroma, Pinecone).
+Recherche sémantique (Retrieval) : Lorsqu'un utilisateur pose une question, celle-ci est également convertie en vecteur. Le système calcule la similarité cosinus entre le vecteur de la question et ceux de la base pour extraire les $k$ segments les plus pertinents.
+-Génération augmentée : Les segments récupérés sont injectés dans le prompt système envoyé au modèle de chat (comme gemini-2.5-flash), accompagné de la question initiale de l'utilisateur.
+
+3. Techniques avancées de RAG
+-Routage de requêtes (Query Routing) : Permet d'orienter la question de l'utilisateur vers la bonne source de données ou de décider si le recours à la base documentaire est nécessaire (par exemple, ignorer le RAG pour une simple salutation comme « Bonjour »).
+-Transformation de requêtes (Query Compression / Expansion) : Reformule la question de l'utilisateur en tenant compte de l'historique de la conversation pour améliorer la précision de la recherche vectorielle.
+
+4. Informations pratiques du projet (Données de test)
+-Projet : TP 4 - Paramétrage avancé du RAG avec LangChain4j
+-Auteur : Aya Jarmouni
+-Technologies utilisées : Java, Maven, LangChain4j, API Google Gemini, SLF4J Simple Logger
+-Objectif du test : Vérifier que le modèle est capable d'extraire ces informations spécifiques (comme le nom de l'auteur, la définition de l'overlap ou le rôle du Query Routing) uniquement à partir de ce document.
